@@ -25,7 +25,7 @@ const empresaRoutes = require('./src/routes/empresaRoutes');
 app.use('/empresa', verificarToken, empresaRoutes);
 
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     mensagem: 'API do Projeto Final SESI SENAI com PostgreSQL',
     versao: '3.0',
     ambiente: process.env.NODE_ENV || 'development',
@@ -35,9 +35,9 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, () => {
   console.log('='.repeat(50));
-  console.log('🚀 Servidor rodando!');
-  console.log(`📍 URL: http://localhost:${PORT}`);
-  console.log(`💾 Banco: PostgreSQL (${process.env.DB_NAME})`);
-  console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
+  console.log('Servidor rodando!');
+  console.log(`URL: http://localhost:${PORT}`);
+  console.log(`Banco: PostgreSQL (${process.env.DB_NAME})`);
+  console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
   console.log('='.repeat(50));
 });
