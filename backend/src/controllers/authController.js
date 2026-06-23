@@ -1,7 +1,9 @@
 const UsuarioModel = require('../models/UsuarioModel');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 async function login(req, res) {
+
   const { email, senha } = req.body;
 
   if (!email || !senha) {
@@ -20,14 +22,19 @@ async function login(req, res) {
       });
     }
 
-    if (usuario.senha !== senha) {
+    const senhaValida = await bcrypt.compare(
+      senha,
+      usuario.senha
+    );
+
+    if (!senhaValida) {
       return res.status(401).json({
         mensagem: 'Senha incorreta'
       });
     }
 
     const payload = {
-      id: usuario.id,
+      sub: usuario.id,
       email: usuario.email
     };
 
@@ -35,7 +42,7 @@ async function login(req, res) {
       payload,
       process.env.JWT_SECRET,
       {
-        expiresIn: '2h'
+        expiresIn: '1h'
       }
     );
 

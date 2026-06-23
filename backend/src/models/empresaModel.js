@@ -37,7 +37,7 @@ async function atualizar(id, dados) {
   
   const sql = `
     UPDATE empresas
-    SET nome = $1, cnpj = $2,
+    SET nome = $1, cnpj = $2
     WHERE id = $3
     RETURNING *
   `;

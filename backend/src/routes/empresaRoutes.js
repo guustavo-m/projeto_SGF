@@ -1,16 +1,16 @@
 const express = require('express');
 const router = express.Router();
 
-const UsuarioController = require('../controllers/usuarioController');
+const EmpresaController = require('../controllers/empresaController');
 
-router.get('/', UsuarioController.listarTodos);
+router.get('/', EmpresaController.listarTodos);
 
-router.get('/:id', UsuarioController.buscarPorId);
+router.get('/:id', EmpresaController.buscarPorId);
 
-router.post('/', UsuarioController.criar);
+router.post('/', EmpresaController.criar);
 
-router.put('/:id', UsuarioController.atualizar);
+router.put('/:id', EmpresaController.atualizar);
 
-router.delete('/:id', UsuarioController.deletar);
+router.delete('/:id', EmpresaController.deletar);
 
 module.exports = router;

@@ -7,7 +7,7 @@ import API_URL from "../../services/api";
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [senha, setsenha] = useState("");
+  const [senha, setSenha] = useState("");
   const [message, setMessage] = useState("");
 
   function showMessage(text) {
@@ -93,11 +93,11 @@ export default function Login() {
 
               <input
                 id="senha"
-                type="senha"
+                type="password"
                 placeholder="Digite sua senha"
                 value={senha}
                 onChange={(e) =>
-                  setsenha(e.target.value)
+                  setSenha(e.target.value)
                 }
                 required
               />
