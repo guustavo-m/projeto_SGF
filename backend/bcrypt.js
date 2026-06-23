@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs"
 
-const senha = "manu123"
+const senha = "123456"
 
 const hash = await bcrypt.hashSync(senha, 10)
 
