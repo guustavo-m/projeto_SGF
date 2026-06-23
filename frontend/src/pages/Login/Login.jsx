@@ -54,11 +54,7 @@ export default function Login() {
     <>
       <header className={styles.header}>
         <div className={styles.logo}>
-<<<<<<< HEAD
-          <h1>PROJETO SGF</h1>
-=======
-          <h1>Projeto final SGF</h1>
->>>>>>> a4d68db81c7adf7008b201efe40634f5948e3144
+          <h1>PROJETO SGF</h1>  
         </div>
       </header>
 
