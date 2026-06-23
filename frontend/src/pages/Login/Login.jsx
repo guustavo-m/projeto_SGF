@@ -55,7 +55,7 @@ export default function Login() {
     <>
       <header className={styles.header}>
         <div className={styles.logo}>
-          <h1>BUSCFÍSICA</h1>
+          <h1>Projeto_SGF</h1>
           <img src={logo} alt="logo buscfísica" />
         </div>
       </header>
