@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./Login.module.css";
-import logo from "/img/logo_buscfisica.png";
 import API_URL from "../../services/api";
 
 export default function Login() {
@@ -55,8 +54,7 @@ export default function Login() {
     <>
       <header className={styles.header}>
         <div className={styles.logo}>
-          <h1>BUSCFÍSICA</h1>
-          <img src={logo} alt="logo buscfísica" />
+          <h1>PROJETO SGF</h1>
         </div>
       </header>
 
