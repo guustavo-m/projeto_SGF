@@ -43,7 +43,7 @@ export default function Login() {
         throw new Error(data.mensagem || "Falha no login");
       }
       const data = await response.json();
-      localStorage.setItem("jwtToken", data.token);
+      localStorage.setItem("token", data.token);
       navigate("/home");
     } catch (error) {
       showMessage(error.message);

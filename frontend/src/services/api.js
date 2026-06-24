@@ -1,7 +1,7 @@
 const API_URL = "http://localhost:3000";
 
 function getAuthHeaders() {
-  const token = localStorage.getItem("jwtToken");
+  const token = localStorage.getItem("token");
   return {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
@@ -63,7 +63,11 @@ export async function criarProduto(dados) {
     headers: getAuthHeaders(),
     body: JSON.stringify(dados),
   });
-  if (!res.ok) throw new Error("Erro ao criar produto");
+  if (!res.ok) {
+  const erro = await res.json();
+  console.log("ERRO BACKEND:", erro);
+  throw new Error(JSON.stringify(erro));
+}
   return res.json();
 }
 
@@ -73,7 +77,11 @@ export async function atualizarProduto(id, dados) {
     headers: getAuthHeaders(),
     body: JSON.stringify(dados),
   });
-  if (!res.ok) throw new Error("Erro ao atualizar produto");
+    if (!res.ok) {
+  const erro = await res.json();
+  console.log("ERRO BACKEND:", erro);
+  throw new Error(JSON.stringify(erro));
+}
   return res.json();
 }
 

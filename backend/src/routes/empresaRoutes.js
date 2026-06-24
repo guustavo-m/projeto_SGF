@@ -2,15 +2,16 @@ const express = require('express');
 const router = express.Router();
 
 const EmpresaController = require('../controllers/empresaController');
+const { verificarToken } = require('../middleware/authMiddleware');
 
-router.get('/', EmpresaController.listarTodos);
+router.get('/', verificarToken, EmpresaController.listarTodos);
 
-router.get('/:id', EmpresaController.buscarPorId);
+router.get('/:id', verificarToken, EmpresaController.buscarPorId);
 
-router.post('/', EmpresaController.criar);
+router.post('/', verificarToken, EmpresaController.criar);
 
-router.put('/:id', EmpresaController.atualizar);
+router.put('/:id', verificarToken, EmpresaController.atualizar);
 
-router.delete('/:id', EmpresaController.deletar);
+router.delete('/:id', verificarToken, EmpresaController.deletar);
 
 module.exports = router;

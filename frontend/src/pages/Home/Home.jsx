@@ -1,32 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-// ─── Dados iniciais ───────────────────────────────────────────────
-const initialEmpresas = [
-  { id: 1, nome: "Tech Brasil Ltda", cnpj: "12.345.678/0001-90", contato: "Carlos Mendes", email: "carlos@techbrasil.com", ativa: true },
-  { id: 2, nome: "Indústrias Sol", cnpj: "98.765.432/0001-10", contato: "Ana Lima", email: "ana@industriassol.com", ativa: true },
-  { id: 3, nome: "Grupo Nexus", cnpj: "11.222.333/0001-44", contato: "Paulo Ramos", email: "paulo@nexus.com", ativa: true },
-  { id: 4, nome: "Comércio ABC", cnpj: "55.666.777/0001-88", contato: "Fernanda Costa", email: "fernanda@abc.com", ativa: false },
-];
-
-const initialProdutos = [
-  { id: 1, nome: 'Notebook Pro 15"', empresaId: 1, categoria: "Eletrônicos", estoque: 42, preco: 3890, ativo: true },
-  { id: 2, nome: "Smartphone X12", empresaId: 1, categoria: "Eletrônicos", estoque: 18, preco: 1599, ativo: true },
-  { id: 3, nome: "Impressora Laser", empresaId: 2, categoria: "Escritório", estoque: 0, preco: 780, ativo: false },
-  { id: 4, nome: "Cadeira Ergonômica", empresaId: 3, categoria: "Móveis", estoque: 75, preco: 1200, ativo: true },
-  { id: 5, nome: "Kit Embalagens 500un", empresaId: 4, categoria: "Suprimentos", estoque: 3, preco: 95, ativo: true },
-  { id: 6, nome: "Conjunto Ferramentas", empresaId: 2, categoria: "Industrial", estoque: 29, preco: 340, ativo: true },
-  { id: 7, nome: 'Monitor 27" 4K', empresaId: 1, categoria: "Eletrônicos", estoque: 11, preco: 2100, ativo: true },
-  { id: 8, nome: "Software Gestão ERP", empresaId: 3, categoria: "Software", estoque: 999, preco: 490, ativo: true },
-  { id: 9, nome: "Mesa de Escritório", empresaId: 4, categoria: "Móveis", estoque: 15, preco: 850, ativo: true },
-  { id: 10, nome: "Teclado Mecânico", empresaId: 1, categoria: "Eletrônicos", estoque: 60, preco: 420, ativo: true },
-  { id: 11, nome: "Roteador Industrial", empresaId: 2, categoria: "Rede", estoque: 8, preco: 1100, ativo: true },
-  { id: 12, nome: "Papel A4 (500 fls)", empresaId: 4, categoria: "Suprimentos", estoque: 200, preco: 28, ativo: false },
-];
+import {
+  listarEmpresas,
+  listarProdutos,
+  criarEmpresa,
+  atualizarEmpresa,
+  deletarEmpresa,
+  criarProduto,
+  atualizarProduto,
+  deletarProduto
+} from "../../services/api";
 
 // ─── Modais ───────────────────────────────────────────────────────
 function ModalEmpresa({ empresa, onSave, onClose }) {
   const [form, setForm] = useState(
-    empresa || { nome: "", cnpj: "", contato: "", email: "", ativa: true }
+    empresa || {
+      nome: "",
+      cnpj: ""
+    }
   );
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -38,7 +29,7 @@ function ModalEmpresa({ empresa, onSave, onClose }) {
           <button onClick={onClose} style={styles.modalClose}>✕</button>
         </div>
         <div style={styles.modalBody}>
-          {[["Nome", "nome"], ["CNPJ", "cnpj"], ["Contato", "contato"], ["E-mail", "email"]].map(([label, key]) => (
+          {[["Nome", "nome"], ["CNPJ", "cnpj"]].map(([label, key]) => (
             <div key={key} style={styles.field}>
               <label style={styles.fieldLabel}>{label}</label>
               <input
@@ -48,13 +39,6 @@ function ModalEmpresa({ empresa, onSave, onClose }) {
               />
             </div>
           ))}
-          <div style={styles.field}>
-            <label style={styles.fieldLabel}>Status</label>
-            <select value={form.ativa ? "1" : "0"} onChange={(e) => set("ativa", e.target.value === "1")} style={styles.input}>
-              <option value="1">Ativa</option>
-              <option value="0">Inativa</option>
-            </select>
-          </div>
         </div>
         <div style={styles.modalFooter}>
           <button onClick={onClose} style={styles.btnSecondary}>Cancelar</button>
@@ -67,7 +51,12 @@ function ModalEmpresa({ empresa, onSave, onClose }) {
 
 function ModalProduto({ produto, empresas, onSave, onClose }) {
   const [form, setForm] = useState(
-    produto || { nome: "", empresaId: empresas[0]?.id || "", categoria: "", estoque: 0, preco: 0, ativo: true }
+    produto || {
+      nome: "",
+      preco: 0,
+      quantidade_estoque: 0,
+      empresa_id: empresas[0]?.id || ""
+    }
   );
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -85,30 +74,33 @@ function ModalProduto({ produto, empresas, onSave, onClose }) {
           </div>
           <div style={styles.field}>
             <label style={styles.fieldLabel}>Empresa</label>
-            <select value={form.empresaId} onChange={(e) => set("empresaId", Number(e.target.value))} style={styles.input}>
+            <select
+              value={form.empresa_id}
+              onChange={(e) =>
+                set("empresa_id", Number(e.target.value))
+              }
+            >
               {empresas.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
             </select>
-          </div>
-          <div style={styles.field}>
-            <label style={styles.fieldLabel}>Categoria</label>
-            <input value={form.categoria} onChange={(e) => set("categoria", e.target.value)} style={styles.input} />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <div style={styles.field}>
               <label style={styles.fieldLabel}>Estoque</label>
-              <input type="number" value={form.estoque} onChange={(e) => set("estoque", Number(e.target.value))} style={styles.input} />
+              <input
+                type="number"
+                value={form.quantidade_estoque}
+                onChange={(e) =>
+                  set(
+                    "quantidade_estoque",
+                    Number(e.target.value)
+                  )
+                }
+              />
             </div>
             <div style={styles.field}>
               <label style={styles.fieldLabel}>Preço (R$)</label>
               <input type="number" value={form.preco} onChange={(e) => set("preco", Number(e.target.value))} style={styles.input} />
             </div>
-          </div>
-          <div style={styles.field}>
-            <label style={styles.fieldLabel}>Status</label>
-            <select value={form.ativo ? "1" : "0"} onChange={(e) => set("ativo", e.target.value === "1")} style={styles.input}>
-              <option value="1">Ativo</option>
-              <option value="0">Inativo</option>
-            </select>
           </div>
         </div>
         <div style={styles.modalFooter}>
@@ -127,24 +119,79 @@ function PageEmpresas({ empresas, setEmpresas }) {
 
   const filtradas = empresas.filter(
     (e) =>
-      e.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      e.contato.toLowerCase().includes(busca.toLowerCase())
+      e.nome.toLowerCase().includes(
+        busca.toLowerCase()
+      ) ||
+      e.cnpj.toLowerCase().includes(
+        busca.toLowerCase()
+      )
   );
 
-  function salvar(form) {
+  async function salvar(form) {
+  try {
     if (modal === "nova") {
-      setEmpresas((prev) => [...prev, { ...form, id: Date.now() }]);
-    } else {
-      setEmpresas((prev) => prev.map((e) => (e.id === modal.id ? { ...modal, ...form } : e)));
-    }
-    setModal(null);
-  }
 
-  function excluir(id) {
-    if (confirm("Excluir esta empresa?")) {
-      setEmpresas((prev) => prev.filter((e) => e.id !== id));
+      const novaEmpresa =
+        await criarEmpresa({
+          nome: form.nome,
+          cnpj: form.cnpj,
+        });
+
+      setEmpresas((prev) => [
+        ...prev,
+        novaEmpresa
+      ]);
+
+    } else {
+
+      const empresaAtualizada =
+        await atualizarEmpresa(
+          modal.id,
+          {
+            nome: form.nome,
+            cnpj: form.cnpj,
+          }
+        );
+
+      setEmpresas((prev) =>
+        prev.map((e) =>
+          e.id === modal.id
+            ? empresaAtualizada
+            : e
+        )
+      );
     }
+
+    setModal(null);
+
+  } catch (erro) {
+
+    console.error(erro);
+
+    alert("Erro ao salvar empresa");
   }
+}
+
+  async function excluir(id) {
+
+  if (!confirm("Excluir esta empresa?"))
+    return;
+
+  try {
+
+    await deletarEmpresa(id);
+
+    setEmpresas((prev) =>
+      prev.filter((e) => e.id !== id)
+    );
+
+  } catch (erro) {
+
+    console.error(erro);
+
+    alert("Erro ao excluir empresa");
+  }
+}
 
   return (
     <div style={styles.pageWrap}>
@@ -168,7 +215,7 @@ function PageEmpresas({ empresas, setEmpresas }) {
 
       <div style={styles.card}>
         <input
-          placeholder="Buscar por nome ou contato..."
+          placeholder="Buscar por nome ou CNPJ..."
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           style={{ ...styles.input, marginBottom: 16 }}
@@ -177,26 +224,19 @@ function PageEmpresas({ empresas, setEmpresas }) {
         <table style={styles.table}>
           <thead>
             <tr>
-              {["Empresa", "CNPJ", "Contato", "E-mail", "Status", ""].map((h) => (
+              {["Empresa", "CNPJ", ""].map((h) => (
                 <th key={h} style={styles.th}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {filtradas.length === 0 && (
-              <tr><td colSpan={6} style={{ ...styles.td, color: "#888", textAlign: "center" }}>Nenhuma empresa encontrada.</td></tr>
+              <tr><td colSpan={3} style={{ ...styles.td, color: "#888", textAlign: "center" }}>Nenhuma empresa encontrada.</td></tr>
             )}
             {filtradas.map((e) => (
               <tr key={e.id}>
                 <td style={{ ...styles.td, fontWeight: 500 }}>{e.nome}</td>
                 <td style={styles.td}>{e.cnpj}</td>
-                <td style={styles.td}>{e.contato}</td>
-                <td style={styles.td}>{e.email}</td>
-                <td style={styles.td}>
-                  <span style={e.ativa ? styles.badgeGreen : styles.badgeRed}>
-                    {e.ativa ? "Ativa" : "Inativa"}
-                  </span>
-                </td>
                 <td style={styles.td}>
                   <div style={{ display: "flex", gap: 6 }}>
                     <button onClick={() => setModal(e)} style={styles.btnIcon}>✏️</button>
@@ -219,26 +259,109 @@ function PageProdutos({ produtos, setProdutos, empresas }) {
 
   const filtrados = produtos.filter(
     (p) =>
-      p.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      p.categoria.toLowerCase().includes(busca.toLowerCase())
+      p.nome.toLowerCase().includes(
+        busca.toLowerCase()
+      )
   );
 
-  function salvar(form) {
+  async function salvar(form) {
+
+  try {
+
     if (modal === "novo") {
-      setProdutos((prev) => [...prev, { ...form, id: Date.now() }]);
+
+      console.log({
+        nome: form.nome,
+        preco: form.preco,
+        quantidade_estoque: form.estoque,
+        empresa_id: form.empresaId,
+      });
+
+      const novoProduto =
+        await criarProduto({
+          nome: form.nome,
+          preco: form.preco,
+          quantidade_estoque: form.quantidade_estoque,
+          empresa_id: form.empresa_id,
+        });
+
+        setProdutos((prev) => [
+          ...prev,
+          {
+            id: novoProduto.id,
+            nome: novoProduto.nome,
+            preco: Number(novoProduto.preco),
+            quantidade_estoque: novoProduto.quantidade_estoque,
+            empresa_id: novoProduto.empresa_id,
+          }
+        ]);
+
     } else {
-      setProdutos((prev) => prev.map((p) => (p.id === modal.id ? { ...modal, ...form } : p)));
+
+      const produtoAtualizado =
+        await atualizarProduto(
+          modal.id,
+          {
+            nome: form.nome,
+            preco: form.preco,
+            quantidade_estoque: form.quantidade_estoque,
+            empresa_id: form.empresa_id,
+          }
+        );
+
+      setProdutos((prev) =>
+        prev.map((p) =>
+          p.id === modal.id
+            ? {
+                id: produtoAtualizado.id,
+                nome: produtoAtualizado.nome,
+                preco: Number(produtoAtualizado.preco),
+                estoque:
+                  produtoAtualizado.quantidade_estoque,
+                empresaId:
+                  produtoAtualizado.empresa_id,
+              }
+            : p
+        )
+      );
     }
+
     setModal(null);
-  }
 
-  function excluir(id) {
-    if (confirm("Excluir este produto?")) {
-      setProdutos((prev) => prev.filter((p) => p.id !== id));
-    }
-  }
+  } catch (erro) {
 
-  const nomeEmpresa = (id) => empresas.find((e) => e.id === id)?.nome ?? "—";
+    console.error(erro);
+
+    alert("Erro ao salvar produto");
+  }
+}
+
+  async function excluir(id) {
+
+  if (!confirm("Excluir este produto?"))
+    return;
+
+  try {
+
+    await deletarProduto(id);
+
+    setProdutos((prev) =>
+      prev.filter((p) => p.id !== id)
+    );
+
+  } catch (erro) {
+
+    console.error(erro);
+
+    alert("Erro ao excluir produto");
+  }
+}
+
+  const nomeEmpresa = (id) =>
+  empresas.find(
+    (e) =>
+      Number(e.id) === Number(id)
+  )?.nome ?? "—";
 
   return (
     <div style={styles.pageWrap}>
@@ -263,7 +386,7 @@ function PageProdutos({ produtos, setProdutos, empresas }) {
 
       <div style={styles.card}>
         <input
-          placeholder="Buscar por nome ou categoria..."
+          placeholder="Buscar por nome..."
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           style={{ ...styles.input, marginBottom: 16 }}
@@ -272,26 +395,45 @@ function PageProdutos({ produtos, setProdutos, empresas }) {
         <table style={styles.table}>
           <thead>
             <tr>
-              {["Produto", "Empresa", "Categoria", "Estoque", "Preço", "Status", ""].map((h) => (
+              {["Produto", "Empresa", "Estoque", "Preço", ""].map((h) => (
                 <th key={h} style={styles.th}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {filtrados.length === 0 && (
-              <tr><td colSpan={7} style={{ ...styles.td, color: "#888", textAlign: "center" }}>Nenhum produto encontrado.</td></tr>
+              <tr><td colSpan={5} style={{ ...styles.td, color: "#888", textAlign: "center" }}>Nenhum produto encontrado.</td></tr>
             )}
             {filtrados.map((p) => (
               <tr key={p.id}>
-                <td style={{ ...styles.td, fontWeight: 500 }}>{p.nome}</td>
-                <td style={styles.td}>{nomeEmpresa(p.empresaId)}</td>
-                <td style={styles.td}>{p.categoria}</td>
-                <td style={styles.td}>{p.estoque}</td>
-                <td style={styles.td}>R$ {p.preco.toLocaleString("pt-BR")}</td>
+                <td
+                  style={{
+                    ...styles.td,
+                    fontWeight: 500
+                  }}
+                >
+                  {p.nome}
+                </td>
+
                 <td style={styles.td}>
-                  <span style={p.ativo ? styles.badgeGreen : styles.badgeRed}>
-                    {p.ativo ? "Ativo" : "Inativo"}
-                  </span>
+                  {nomeEmpresa(
+                    p.empresa_id
+                  )}
+                </td>
+
+                <td style={styles.td}>
+                  {p.quantidade_estoque}
+                </td>
+
+                <td style={styles.td}>
+                  R$ {Number(
+                    p.preco
+                  ).toLocaleString(
+                    "pt-BR",
+                    {
+                      minimumFractionDigits: 2
+                    }
+                  )}
                 </td>
                 <td style={styles.td}>
                   <div style={{ display: "flex", gap: 6 }}>
@@ -312,30 +454,72 @@ function PageProdutos({ produtos, setProdutos, empresas }) {
 export default function Home() {
   const [refreshing, setRefreshing] = useState(false);
   const [activePage, setActivePage] = useState("dashboard");
-  const [empresas, setEmpresas] = useState(initialEmpresas);
-  const [produtos, setProdutos] = useState(initialProdutos);
-  const userEmail = "user@gmail.com";
+  const [empresas, setEmpresas] = useState([]);
+  const [produtos, setProdutos] = useState([]);
+
+  useEffect(() => {
+  carregarDados();
+}, []);
+
+async function carregarDados() {
+  try {
+    const empresasDB = await listarEmpresas();
+    const produtosDB = await listarProdutos();
+
+    setEmpresas(empresasDB);
+
+    setProdutos(
+      produtosDB.map((produto) => ({
+        id: produto.id,
+        nome: produto.nome,
+        preco: Number(produto.preco),
+        quantidade_estoque: produto.quantidade_estoque,
+        empresa_id: produto.empresa_id,
+      }))
+    );
+  } catch (erro) {
+    console.error("Erro ao carregar dados:", erro);
+  }
+}
+
+useEffect(() => {
+  carregarDados();
+}, []);
 
   // Métricas calculadas dinamicamente
   const counts = {
     empresas: empresas.length,
     produtos: produtos.length,
-    estoque: produtos.reduce((s, p) => s + p.estoque, 0),
-    ativos: produtos.filter((p) => p.ativo).length,
+    estoque: produtos.reduce(
+      (s, p) => s + Number(p.estoque || 0),
+      0
+    ),
+    ativos: produtos.length
   };
 
   const metrics = [
     { id: "empresas", label: "Empresas", icon: "🏢", accent: "#1a7a42" },
-    { id: "produtos", label: "Produtos", icon: "📦", accent: "#185FA5" },
-    { id: "estoque", label: "Estoque total", icon: "🏭", accent: "#BA7517" },
-    { id: "ativos", label: "Ativos", icon: "✅", accent: "#444" },
+    { id: "produtos", label: "Produtos", icon: "📦", accent: "#185FA5" }
   ];
 
-  function handleRefresh() {
+  async function handleRefresh() {
     if (refreshing) return;
+
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1200);
+
+    await carregarDados();
+
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 600);
   }
+
+  function sair() {
+
+  localStorage.removeItem("token");
+
+  window.location.href = "/";
+}
 
   return (
     <div style={styles.app}>
@@ -367,7 +551,7 @@ export default function Home() {
           ))}
         </div>
 
-        <button style={styles.navExit}>↩ Sair</button>
+        <button style={styles.navExit} onClick={sair}>↩ Sair</button>
       </nav>
 
       {/* Páginas */}
@@ -383,16 +567,6 @@ export default function Home() {
               Controle empresas fornecedoras, cadastre produtos vinculados a cada
               empresa e acompanhe o estoque geral do sistema.
             </p>
-            <div style={styles.userBox}>
-              <p style={styles.userLabel}>Usuário conectado</p>
-              <p style={styles.userEmail}>{userEmail}</p>
-              <button onClick={handleRefresh} disabled={refreshing} style={styles.btnRefresh}>
-                <span style={{ display: "inline-block", animation: refreshing ? "spin 0.8s linear infinite" : "none" }}>
-                  🔄
-                </span>{" "}
-                {refreshing ? "Atualizando..." : "Atualizar"}
-              </button>
-            </div>
           </div>
 
           {/* Métricas — calculadas dinamicamente */}
